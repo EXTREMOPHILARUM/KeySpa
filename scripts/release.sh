@@ -24,7 +24,13 @@ fi
 
 RELEASE_BUILD=1 ./scripts/build-app.sh
 app="dist/KeySpa.app"
-lipo "$app/Contents/MacOS/KeySpa" -verify_arch arm64 x86_64
+architectures="$(lipo -archs "$app/Contents/MacOS/KeySpa")"
+for arch in arm64 x86_64; do
+    if [[ " $architectures " != *" $arch "* ]]; then
+        echo "Release binary is missing architecture: $arch" >&2
+        exit 1
+    fi
+done
 signature="$(codesign --display --verbose=4 "$app" 2>&1)"
 if ! grep -q '^Authority=Developer ID Application:' <<< "$signature" ||
    ! grep -q 'flags=.*runtime' <<< "$signature" ||

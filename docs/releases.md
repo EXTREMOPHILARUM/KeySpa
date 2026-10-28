@@ -36,6 +36,8 @@ Use stdin or an interactive secret prompt; do not put credentials in commits, co
 
 Local certificate choices stay in `.signing-identity` and are ignored by Git. The release workflow explicitly selects the certificate imported into its temporary keychain.
 
+To save the notarization password both locally and in GitHub, run `./scripts/configure-notarization.sh` and paste it into the hidden terminal prompt. This creates or updates a Git-ignored `.env` with owner-only permissions and sends the value to `APPLE_APP_SPECIFIC_PASSWORD` through stdin. It never prints the value. Keep `.env` private and do not paste it into chat or logs. The release script expects environment variables; it does not automatically read `.env`.
+
 ## Publish a version
 
 Update both `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`. Use `MAJOR.MINOR.PATCH` for the former and an increasing build number for the latter. Commit and push the version change, and confirm CI passes before tagging:
