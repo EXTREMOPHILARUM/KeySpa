@@ -1,55 +1,49 @@
 # KeySpa
 
-**A little downtime for your keyboard.**
-
 <img src="../Resources/KeySpa.png" width="128" alt="KeySpa: a mint keyboard with sparkles">
 
-A tiny SwiftUI menu bar app for cleaning your Mac keyboard. Click **Lock keyboard**, wipe your keys, then click **Unlock keyboard**. Your mouse and trackpad keep working. There is no time limit. Sleep and quitting the app also release the lock.
+**Lock your keyboard. Wipe it clean. Get back to work.**
 
-## Run
+KeySpa lives in your Mac’s menu bar and pauses keyboard input while you clean. Your mouse and trackpad keep working, so you can unlock whenever you’re ready. No countdown. No account. No subscription.
 
-Requires macOS 14+ and Xcode 15+ (or compatible Swift command line tools).
+[**Download KeySpa for Mac**](https://github.com/EXTREMOPHILARUM/KeySpa/releases/latest)
 
-```sh
-./scripts/build-app.sh
-open dist/KeySpa.app
-```
+Requires **macOS 14 Sonoma or later**. Supports **Apple Silicon and Intel** Macs. Free and open source.
 
-Move the app to `/Applications` before granting permissions if you want to keep it installed. Click the keyboard icon in the menu bar. The first lock attempt asks for **System Settings → Privacy & Security → Accessibility** access. Enable KeySpa, then click Lock again. If macOS does not pick up the permission change, quit and reopen the app.
+## Install
 
-Open `Package.swift` in Xcode to work on the code. Use the bundled `.app` for permission testing; `swift run` uses a different executable location.
+1. Download the **`.dmg`** file from the latest release.
+2. Open it and drag **KeySpa** into **Applications**.
+3. Eject the disk image, then open KeySpa from Applications.
+4. Look for the **keyboard icon in your menu bar**. KeySpa doesn’t appear in the Dock.
 
-## How it works
+Releases are signed with Developer ID and notarized by Apple.
 
-A Core Graphics session event tap discards keyboard down/up events, modifier changes, and system-defined events while locked. No keystrokes are recorded, stored, or sent anywhere. Pointer events pass through so you can unlock from the menu bar. If macOS disables the tap, KeySpa releases the lock and shows a message.
+## Clean your keyboard
 
-This is a cleaning aid, not a security lock. Power/Touch ID, OS-reserved shortcuts, and input in secure system contexts may still act. System-defined events include media keys; behavior varies by hardware. Avoid the power button while cleaning.
+1. Click the keyboard icon in the menu bar.
+2. Click **Lock keyboard**. On first use, allow KeySpa in **System Settings → Privacy & Security → Accessibility**, then try Lock again.
+3. Wipe your keyboard.
+4. Use your mouse or trackpad to click the menu bar icon, then **Unlock keyboard**.
 
-## Verify
+The keyboard stays locked until you unlock it. Quitting KeySpa or putting your Mac to sleep also releases the lock. If macOS interrupts the lock, KeySpa shows a message; lock again before continuing to clean.
 
-```sh
-swift test
-./scripts/build-app.sh
-codesign --verify --strict dist/KeySpa.app
-```
+**Keep clear of the power / Touch ID button.** KeySpa is a cleaning aid, and some hardware buttons or system-reserved shortcuts may still respond.
 
-Manual acceptance checklist:
+## Your typing stays yours
 
-- Deny Accessibility: locking must show instructions and stay unlocked.
-- Grant access: lock, open a disposable text document with the mouse, and confirm ordinary keys and modifiers do not type or trigger shortcuts.
-- Check media keys on your hardware. Do not test by pressing the power button.
-- Click Unlock and confirm typing resumes.
-- Lock again, wait more than five minutes, and confirm the keyboard stays locked until you click Unlock.
-- Confirm quit and sleep both release the lock.
+KeySpa doesn’t record keystrokes, send your typing anywhere, or collect analytics. Accessibility permission lets it block keyboard input while cleaning. It doesn’t require an account or an internet connection to use.
+
+## Need a hand?
+
+**I don’t see an app window.** Click the keyboard icon in the menu bar; KeySpa has no Dock icon.
+
+**Accessibility is enabled, but KeySpa still asks.** Quit KeySpa. In Accessibility settings, remove the old KeySpa entry, add the copy in Applications, and enable it. Then reopen KeySpa and try again. This can happen when switching from a development build.
+
+**How do I uninstall it?** Quit KeySpa from its menu, then move it from Applications to the Trash.
+
+Found a problem? [Open an issue](https://github.com/EXTREMOPHILARUM/KeySpa/issues/new) with your macOS version and what happened. Please don’t include passwords or private typing.
 
 ## Open source
 
-MIT licensed. No dependencies, analytics, or background services.
-
-Repository: [EXTREMOPHILARUM/KeySpa](https://github.com/EXTREMOPHILARUM/KeySpa). See [Releasing KeySpa](releases.md) for CI, Developer ID signing, Apple notarization, required secrets, and version tags. Public release ZIPs include Apple Silicon and Intel binaries plus SHA-256 checksums. A release is published only after signing, notarization, stapling, and Gatekeeper verification succeed.
-
-Builds use `SIGNING_IDENTITY`, or the certificate name/hash in a local `.signing-identity` file (ignored by Git). Without either, the build is ad-hoc signed. To keep Accessibility access across local rebuilds, select a certificate from `security find-identity -v -p codesigning` and save its hash in `.signing-identity`. Keep using that identity and the same app location.
-
-When switching from ad-hoc signing to certificate signing, quit KeySpa, remove its old Accessibility entry, then add and enable the current app once. A listed entry can refer to an older build even when its switch is enabled.
-
-Public downloadable releases should use Developer ID signing and Apple notarization. Apple Development signing is suitable for local development; ad-hoc builds can trigger Gatekeeper and rebuilds may require regranting Accessibility access.
+KeySpa is MIT licensed. Contributions are welcome. See the [developer guide](development.md) to build it yourself, or the [release guide](releases.md) for signing and publishing.

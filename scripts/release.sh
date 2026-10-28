@@ -39,8 +39,11 @@ if ! grep -q '^Authority=Developer ID Application:' <<< "$signature" ||
     exit 1
 fi
 
-ditto -c -k --keepParent "$app" dist/notarization-upload.zip
-xcrun notarytool submit dist/notarization-upload.zip \
+image="dist/KeySpa-${version}-macOS.dmg"
+./scripts/build-dmg.sh "$app" "$image"
+codesign --force --sign "$SIGNING_IDENTITY" --timestamp "$image"
+codesign --verify --strict "$image"
+xcrun notarytool submit "$image" \
     --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" \
     --password "$APPLE_APP_SPECIFIC_PASSWORD" \
     --wait --timeout 30m --output-format json > dist/notarization.json
@@ -52,10 +55,8 @@ if ! jq -e '.status == "Accepted"' dist/notarization.json > /dev/null; then
     echo "Notarization was not accepted; see dist/notarization-log.json" >&2
     exit 1
 fi
-xcrun stapler staple "$app"
-xcrun stapler validate "$app"
-spctl --assess --type execute --verbose=2 "$app"
-archive="KeySpa-${version}-macOS.zip"
-ditto -c -k --keepParent "$app" "dist/$archive"
-(cd dist && shasum -a 256 "$archive" > SHA256SUMS.txt)
-echo "Release ready: dist/$archive"
+xcrun stapler staple "$image"
+xcrun stapler validate "$image"
+spctl --assess --type open --context context:primary-signature --verbose=2 "$image"
+(cd dist && shasum -a 256 "${image#dist/}" > SHA256SUMS.txt)
+echo "Release ready: $image"

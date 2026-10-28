@@ -12,9 +12,9 @@ Pushing a version tag runs the release workflow:
 2. Run all tests.
 3. Import the distribution certificate into a temporary keychain. The import action removes that keychain after the job.
 4. Build a universal macOS 14+ app for Apple Silicon and Intel. Sign with **Developer ID Application**, hardened runtime, and a secure timestamp.
-5. Submit to Apple notarization and wait for acceptance. A rejection or timeout fails the job.
-6. Staple and validate the notarization ticket, then assess the app with Gatekeeper.
-7. Package the stapled app as `KeySpa-VERSION-macOS.zip`, generate `SHA256SUMS.txt`, upload both files to a draft release, then publish it. An interrupted upload leaves a draft, not a public release.
+5. Package the signed app and an Applications shortcut in `KeySpa-VERSION-macOS.dmg`, then sign the disk image with Developer ID and a secure timestamp.
+6. Submit the DMG to Apple notarization and wait for acceptance. A rejection or timeout fails the job. Apple scans the app inside the image as part of this submission.
+7. Staple and validate the DMG ticket, assess the image with Gatekeeper, generate `SHA256SUMS.txt`, upload both files to a draft release, then publish it. An interrupted upload leaves a draft, not a public release.
 
 Failed signing, notarization, or Gatekeeper checks prevent publication. A development-signed app is not a public release. Release credentials are used only by tag or manually dispatched release jobs, never pull request jobs. Actions are pinned to commit hashes.
 
@@ -45,15 +45,15 @@ Update both `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Inf
 ```sh
 swift test
 ./scripts/test-release.sh
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 gh run list --workflow release.yml --repo EXTREMOPHILARUM/KeySpa
 ```
 
-Use a new version for each release. Never move a published tag. A failed release can be retried from the Actions UI or with `gh workflow run release.yml --repo EXTREMOPHILARUM/KeySpa -f tag=v0.1.0`. If upload failed and left a draft, delete that incomplete draft (keep its Git tag) before retrying. If publication succeeded, use a new version instead of rerunning it.
+Use a new version for each release. Never move a published tag. A failed release can be retried from the Actions UI or with `gh workflow run release.yml --repo EXTREMOPHILARUM/KeySpa -f tag=v0.1.1`. If upload failed and left a draft, delete that incomplete draft (keep its Git tag) before retrying. If publication succeeded, use a new version instead of rerunning it.
 
-To build locally with the same pipeline, export the four signing/notarization environment variables used by `scripts/release.sh`, then run `./scripts/release.sh v0.1.0`. The script prepares the verified ZIP and checksum but does not publish to GitHub. A notary rejection writes `dist/notarization-log.json` for inspection. A timeout fails closed; check the existing submission with `notarytool` before resubmitting.
+To build locally with the same pipeline, export the four signing/notarization environment variables used by `scripts/release.sh`, then run `./scripts/release.sh v0.1.1`. The script prepares the verified DMG and checksum but does not publish to GitHub. A notary rejection writes `dist/notarization-log.json` for inspection. A timeout fails closed; check the existing submission with `notarytool` before resubmitting.
 
 ## Verification limits
 
-The mocked shell tests verify failure handling and packaging without contacting Apple. Swift tests cover event filtering and panel anchoring. Neither proves that a notarized download passes Gatekeeper on another Mac or that keyboard blocking works with that Mac's permissions and hardware. Perform those checks on the downloaded release before recommending it to users. Intel is cross-compiled; running it on an Intel Mac remains a separate check.
+The mocked shell tests verify failure handling, the app/Applications-link layout, DMG signing, and packaging without contacting Apple. Swift tests cover event filtering and panel anchoring. Neither proves that a notarized download passes Gatekeeper on another Mac or that keyboard blocking works with that Mac's permissions and hardware. Perform those checks on the downloaded release before recommending it to users. Intel is cross-compiled; running it on an Intel Mac remains a separate check.
