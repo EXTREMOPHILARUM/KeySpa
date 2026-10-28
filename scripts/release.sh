@@ -24,7 +24,7 @@ fi
 
 RELEASE_BUILD=1 ./scripts/build-app.sh
 app="dist/KeySpa.app"
-lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/KeySpa"
+lipo "$app/Contents/MacOS/KeySpa" -verify_arch arm64 x86_64
 signature="$(codesign --display --verbose=4 "$app" 2>&1)"
 if ! grep -q '^Authority=Developer ID Application:' <<< "$signature" ||
    ! grep -q 'flags=.*runtime' <<< "$signature" ||

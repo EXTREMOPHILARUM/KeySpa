@@ -26,7 +26,9 @@ case "$(basename "$0")" in
     else
       echo "codesign $*" >> "$FIXTURE_DIR/calls"
     fi ;;
-  lipo) echo "lipo $*" >> "$FIXTURE_DIR/calls" ;;
+  lipo)
+    [[ "$#" == 4 && -f "$1" && "$2" == -verify_arch && "$3" == arm64 && "$4" == x86_64 ]]
+    echo "lipo $*" >> "$FIXTURE_DIR/calls" ;;
   ditto) touch "${@: -1}" ;;
   xcrun)
     if [[ "$1 $2" == 'notarytool submit' ]]; then
