@@ -69,4 +69,5 @@ jobs:
         run: |
           gh release create "$RELEASE_TAG" \
             "dist/KeySpa-${RELEASE_TAG#v}-macOS.zip" dist/SHA256SUMS.txt \
-            --verify-tag --title "KeySpa $RELEASE_TAG" --generate-notes
+            --verify-tag --title "KeySpa $RELEASE_TAG" --generate-notes --draft
+          gh release edit "$RELEASE_TAG" --draft=false --latest

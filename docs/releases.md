@@ -14,7 +14,7 @@ Pushing a version tag runs the release workflow:
 4. Build a universal macOS 14+ app for Apple Silicon and Intel. Sign with **Developer ID Application**, hardened runtime, and a secure timestamp.
 5. Submit to Apple notarization and wait for acceptance. A rejection or timeout fails the job.
 6. Staple and validate the notarization ticket, then assess the app with Gatekeeper.
-7. Package the stapled app as `KeySpa-VERSION-macOS.zip`, generate `SHA256SUMS.txt`, and create a GitHub release containing both files.
+7. Package the stapled app as `KeySpa-VERSION-macOS.zip`, generate `SHA256SUMS.txt`, upload both files to a draft release, then publish it. An interrupted upload leaves a draft, not a public release.
 
 Failed signing, notarization, or Gatekeeper checks prevent publication. A development-signed app is not a public release. Release credentials are used only by tag or manually dispatched release jobs, never pull request jobs. Actions are pinned to commit hashes.
 
@@ -48,7 +48,7 @@ git push origin v0.1.0
 gh run list --workflow release.yml --repo EXTREMOPHILARUM/KeySpa
 ```
 
-Use a new version for each release. Never move a published tag. A failed release can be retried from the Actions UI or with `gh workflow run release.yml --repo EXTREMOPHILARUM/KeySpa -f tag=v0.1.0`. If publication succeeded, use a new version instead of rerunning it.
+Use a new version for each release. Never move a published tag. A failed release can be retried from the Actions UI or with `gh workflow run release.yml --repo EXTREMOPHILARUM/KeySpa -f tag=v0.1.0`. If upload failed and left a draft, delete that incomplete draft (keep its Git tag) before retrying. If publication succeeded, use a new version instead of rerunning it.
 
 To build locally with the same pipeline, export the four signing/notarization environment variables used by `scripts/release.sh`, then run `./scripts/release.sh v0.1.0`. The script prepares the verified ZIP and checksum but does not publish to GitHub. A notary rejection writes `dist/notarization-log.json` for inspection. A timeout fails closed; check the existing submission with `notarytool` before resubmitting.
 
