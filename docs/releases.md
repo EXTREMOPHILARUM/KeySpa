@@ -20,7 +20,7 @@ Failed signing, notarization, or Gatekeeper checks prevent publication. A develo
 
 ## One-time credentials
 
-You need a paid Apple Developer team and a **Developer ID Application** certificate with its private key. Apple Development and Apple Distribution certificates do not qualify for this workflow. If Developer ID creation is unavailable in Xcode, the team's Account Holder needs to create the certificate.
+You need a paid Apple Developer team and a **Developer ID Application** certificate with its private key. Apple Development and Apple Distribution certificates do not qualify for this workflow. If Xcode disables certificate creation, check Certificates, Identifiers & Profiles in the Apple Developer web portal; the portal may allow creation even when Xcode does not. Downloading an existing certificate does not recover its private key.
 
 Export only the Developer ID Application identity to an encrypted `.p12` file, including its private key. Store these repository secrets using `gh secret set --repo EXTREMOPHILARUM/KeySpa`:
 
